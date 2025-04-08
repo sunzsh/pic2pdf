@@ -1,0 +1,121 @@
+@import "../../static/public.wxss";
+
+root {
+  --status-bar-height: auto;
+}
+
+.container {
+  padding: var(--status-bar-height) 20rpx 20rpx 20rpx;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.header {
+  padding: 10rpx 0;
+  text-align: center;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.content {
+  padding: 20rpx;
+}
+
+.image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 500rpx;
+  justify-content: space-around;
+}
+
+.image-item {
+  position: relative;
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  z-index: 1;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.image-item.target {
+  border-left: 4rpx solid blue;
+}
+
+.image-item.dragging {
+  z-index: 10;
+  transform: scale(1.05);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.2);
+}
+
+.image-item image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+}
+
+.add-btn {
+  width: 220rpx;
+  height: 220rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx dashed #ddd;
+  position: relative;
+  z-index: 0;
+}
+.add-btn.test {
+  width: calc(100vw - 3rpx);
+}
+
+.add-icon {
+  font-size: 60rpx;
+  color: #999;
+}
+
+.footer {
+  padding: 40rpx 20rpx;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.generate-btn {
+  background: #07c160;
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  padding: 20rpx 0;
+}
+
+.generate-btn[disabled] {
+  background: #ccc;
+  color: #fff;
+} 
