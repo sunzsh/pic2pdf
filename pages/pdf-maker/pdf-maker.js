@@ -94,9 +94,12 @@ Page({
 
   // 处理触摸结束
   onTouchEnd(e) {
-    
+
     if (this.data.draggingIndex === -1) return;
-    this.setData({ draggingTarget: -1, draggingIndex: -1 });
+    setTimeout(() => {
+      this.setData({ draggingTarget: -1, draggingIndex: -1 });
+    }, 200)
+
     
     const { index } = e.currentTarget.dataset;
     
@@ -300,7 +303,17 @@ Page({
       const pdfData = doc.output('arraybuffer');
       
       const base64 = wx.arrayBufferToBase64(pdfData);
-      const filePath = `${wx.env.USER_DATA_PATH}/output.pdf`;
+      // yyyyMMddHHmmss
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      const fileName = `${year}${month}${day}${hours}${minutes}${seconds}.pdf`;
+      const filePath = `${wx.env.USER_DATA_PATH}/${fileName}`;
       
       
       await new Promise((resolve, reject) => {
