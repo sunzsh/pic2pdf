@@ -13,7 +13,8 @@ Page({
     draggingIndex: -1,
     draggingTarget: -1,
     pageStyleGlobal: {},
-    combineImages: false
+    combineImages: false,
+    margin: 10  // Default margin value
   },
 
   onLoad() {
@@ -177,6 +178,11 @@ Page({
     });
   },
 
+  onMarginChange(e) {
+    const margin = e.detail.value === '0' ? 0 : (parseInt(e.detail.value) || 10);
+    this.setData({ margin });
+  },
+
   // 生成PDF
   async generatePDF() {
     if (this.data.images.length === 0) {
@@ -199,7 +205,7 @@ Page({
       let currentY = 10; // 当前页面的Y坐标
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 10;
+      const margin = this.data.margin;
       const maxContentWidth = pageWidth - 2 * margin;
       const maxContentHeight = pageHeight - 2 * margin;
 

@@ -119,6 +119,14 @@ root {
   color: #333;
 }
 
+.margin-input {
+  width: 120rpx;
+  text-align: right;
+  border: 1rpx solid #ddd;
+  border-radius: 6rpx;
+  padding: 4rpx 10rpx;
+}
+
 .generate-btn {
   background: #07c160;
   color: #fff;

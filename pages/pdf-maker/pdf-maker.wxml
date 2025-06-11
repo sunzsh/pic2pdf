@@ -27,6 +27,10 @@
         <text>合并图片到同一页</text>
         <switch checked="{{combineImages}}" bindchange="onCombineImagesChange" />
       </view>
+      <view class="option-item">
+        <text>页面边距 (mm)</text>
+        <input type="number" value="{{margin}}" bindchange="onMarginChange" class="margin-input" />
+      </view>
     </view>
     <button class="generate-btn" bindtap="generatePDF" disabled="{{images.length === 0}}">
       生成PDF
