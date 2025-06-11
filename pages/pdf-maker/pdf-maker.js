@@ -12,7 +12,8 @@ Page({
     itemHeight: 220,
     draggingIndex: -1,
     draggingTarget: -1,
-    pageStyleGlobal: {}
+    pageStyleGlobal: {},
+    combineImages: false
   },
 
   onLoad() {
@@ -159,7 +160,7 @@ Page({
     // 确保索引有效
     if (fromIndex < 0 || fromIndex >= this.data.images.length || 
         toIndex < 0 || toIndex >= this.data.images.length) {
-      console.error('无效的索引:', { fromIndex, toIndex, totalImages: this.data.images.length });
+        console.error('无效的索引:', { fromIndex, toIndex, totalImages: this.data.images.length });
       return;
     }
     
@@ -168,6 +169,12 @@ Page({
     images.splice(toIndex, 0, movedItem);
     
     this.setData({ images: images, draggingTarget: -1 });
+  },
+
+  onCombineImagesChange(e) {
+    this.setData({
+      combineImages: e.detail.value
+    });
   },
 
   // 生成PDF
@@ -189,6 +196,12 @@ Page({
       // 创建PDF文档
       const doc = new jsPDF();
       let currentPage = 1;
+      let currentY = 10; // 当前页面的Y坐标
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 10;
+      const maxContentWidth = pageWidth - 2 * margin;
+      const maxContentHeight = pageHeight - 2 * margin;
 
       // 处理所有图片
       for (let i = 0; i < this.data.images.length; i++) {
@@ -209,29 +222,33 @@ Page({
         });
 
         // 计算图片在PDF中的尺寸
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 10;
-        const contentWidth = pageWidth - 2 * margin;
-        const contentHeight = pageHeight - 2 * margin;
-
-        // 计算图片缩放比例
         const scale = Math.min(
-          contentWidth / imageInfo.width,
-          contentHeight / imageInfo.height
+          maxContentWidth / imageInfo.width,
+          maxContentHeight / imageInfo.height
         );
         
         const scaledWidth = imageInfo.width * scale;
         const scaledHeight = imageInfo.height * scale;
 
+        // 如果不合并图片，每张图片都从新页面开始
+        if (!this.data.combineImages) {
+          if (i > 0) {
+            doc.addPage();
+            currentPage++;
+          }
+          currentY = margin;
+        } else {
+          // 如果合并图片且当前页面放不下，添加新页面
+          if (currentY + scaledHeight > maxContentHeight) {
+            doc.addPage();
+            currentPage++;
+            currentY = margin;
+          }
+        }
+
         // 计算图片位置（居中）
         const x = (pageWidth - scaledWidth) / 2;
-        const y = (pageHeight - scaledHeight) / 2;
-
-        // 如果当前页面放不下，添加新页面
-        if (i > 0) {
-          doc.addPage();
-        }
+        const y = this.data.combineImages ? currentY : (pageHeight - scaledHeight) / 2;
 
         // 读取图片数据
         const imageData = await new Promise((resolve, reject) => {
@@ -252,52 +269,46 @@ Page({
           // 调整图片位置和大小
           const adjustedX = Math.max(margin, x);
           const adjustedY = Math.max(margin, y);
-          const adjustedWidth = Math.min(scaledWidth, contentWidth);
-          const adjustedHeight = Math.min(scaledHeight, contentHeight);
+          const adjustedWidth = Math.min(scaledWidth, maxContentWidth);
+          const adjustedHeight = Math.min(scaledHeight, maxContentHeight);
           
           // 检测图片格式
           let uint8Array = new Uint8Array(imageData);
           const isPNG = uint8Array[0] === 0x89 && uint8Array[1] === 0x50;
           const isJPEG = uint8Array[0] === 0xFF && uint8Array[1] === 0xD8;
           
-          
           if (isPNG) {
-            // 如果是PNG，需要先转换为JPEG
-            // 创建临时canvas
             const canvas = wx.createOffscreenCanvas({ type: '2d', width: imageInfo.width, height: imageInfo.height });
             const ctx = canvas.getContext('2d');
             
-            // 创建图片对象
             const img = canvas.createImage();
             
-            // 等待图片加载完成
             await new Promise((resolve, reject) => {
               img.onload = resolve;
               img.onerror = reject;
               img.src = `data:image/png;base64,${wx.arrayBufferToBase64(imageData)}`;
             });
             
-            // 绘制图片到canvas
             ctx.drawImage(img, 0, 0, imageInfo.width, imageInfo.height);
             
-            // 转换为JPEG格式
             const jpegBase64 = canvas.toDataURL('image/jpeg', 0.95).split(',')[1];
-            
-
-            // jpegBase64转buff
             const buffer = wx.base64ToArrayBuffer(jpegBase64);
-            // buff转uint8Array
             uint8Array = new Uint8Array(buffer);
           }
+          
           // 添加到PDF
           doc.addImage(uint8Array, 'JPEG', adjustedX, adjustedY, adjustedWidth, adjustedHeight, '', 'NONE');
+          
+          // 更新当前Y坐标（仅在合并图片时）
+          if (this.data.combineImages) {
+            currentY += adjustedHeight + margin;
+          }
           
         } catch (err) {
           console.error('添加图片失败:', err);
           console.error('错误堆栈:', err.stack);
           throw err;
         }
-        
       }
       
       const pdfData = doc.output('arraybuffer');

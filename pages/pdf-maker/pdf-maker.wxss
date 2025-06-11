@@ -105,6 +105,20 @@ root {
   box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
 }
 
+.options {
+  margin-bottom: 20rpx;
+  padding: 0 20rpx;
+}
+
+.option-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10rpx 0;
+  font-size: 28rpx;
+  color: #333;
+}
+
 .generate-btn {
   background: #07c160;
   color: #fff;
