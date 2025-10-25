@@ -1,0 +1,165 @@
+@import "../../static/public.wxss";
+
+.container {
+  padding: var(--status-bar-height) 20rpx 20rpx 20rpx;
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.header {
+  padding: 20rpx 0;
+  text-align: center;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.content {
+  padding: 20rpx;
+  width: 100%;
+  min-height: calc(100vh - 200rpx);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.history-item {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx 15rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.file-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.file-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+  word-break: break-all;
+}
+
+.file-details {
+  display: flex;
+  gap: 20rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.file-size {
+  background: #f0f0f0;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+}
+
+.file-date {
+  color: #666;
+}
+
+.file-actions {
+  display: flex;
+  gap: 10rpx;
+  flex-shrink: 0;
+  width: 160rpx;
+}
+
+.action-btn {
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
+  font-size: 22rpx;
+  border: none;
+  min-width: 60rpx;
+  white-space: nowrap;
+}
+
+.open-btn {
+  background: #07c160;
+  color: #fff;
+}
+
+.delete-btn {
+  background: #ff4757;
+  color: #fff;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.empty-desc {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 30rpx;
+}
+
+.go-back-btn {
+  background: #07c160;
+  color: #fff;
+  border-radius: 30rpx;
+  font-size: 28rpx;
+  padding: 16rpx 40rpx;
+  border: none;
+}
+
+.footer {
+  padding: 40rpx 20rpx;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 20rpx;
+}
+
+.clear-all-btn {
+  background: #ff4757;
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  padding: 20rpx 0;
+  flex: 1;
+  border: none;
+}
+
+.back-btn {
+  background: #f0f0f0;
+  color: #333;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  padding: 16rpx 0;
+  flex: 1;
+  border: none;
+}

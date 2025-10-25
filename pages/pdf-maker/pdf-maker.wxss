@@ -150,7 +150,23 @@ root {
   padding: 4rpx 10rpx;
 }
 
+.button-group {
+  display: flex;
+  gap: 20rpx;
+}
+
+.history-btn {
+  flex: 1;
+  background: #6c757d;
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  padding: 20rpx 0;
+  border: none;
+}
+
 .generate-btn {
+  flex: 2;
   background: #07c160;
   color: #fff;
   border-radius: 40rpx;

@@ -195,6 +195,13 @@ Page({
     });
   },
 
+  // 跳转到历史页面
+  goToHistory() {
+    wx.navigateTo({
+      url: '/pages/pdf-history/pdf-history'
+    });
+  },
+
   // 生成PDF
   async generatePDF() {
     if (this.data.images.length === 0) {
@@ -346,7 +353,7 @@ Page({
         const seconds = String(now.getSeconds()).padStart(2, '0');
         fileName = `${year}${month}${day}${hours}${minutes}${seconds}.pdf`;
       }
-      const filePath = `${wx.env.USER_DATA_PATH}/pdfs/${fileName}`;
+      const filePath = `${wx.env.USER_DATA_PATH}/${fileName}`;
       
       
       await new Promise((resolve, reject) => {

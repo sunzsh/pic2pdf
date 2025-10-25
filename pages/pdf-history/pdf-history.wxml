@@ -1,0 +1,43 @@
+<view class="container" style="{{pageStyleGlobal}}">
+  <view class="header">
+    <text class="title">PDF生成历史</text>
+  </view>
+  
+  <view class="content">
+    <view class="history-list" wx:if="{{historyList.length > 0}}">
+      <block wx:for="{{historyList}}" wx:key="fileName">
+        <view class="history-item">
+          <view class="file-info">
+            <view class="file-name">{{item.fileName}}</view>
+            <view class="file-details">
+              <text class="file-size">{{item.fileSize}}</text>
+              <text class="file-date">{{item.createTime}}</text>
+            </view>
+          </view>
+          <view class="file-actions">
+            <button class="action-btn open-btn" bindtap="openPDF" data-file-path="{{item.filePath}}">
+              打开
+            </button>
+            <button class="action-btn delete-btn" bindtap="deletePDF" data-file-path="{{item.filePath}}" data-file-name="{{item.fileName}}">
+              删除
+            </button>
+          </view>
+        </view>
+      </block>
+    </view>
+    
+    <view class="empty-state" wx:else>
+      <view class="empty-icon">📄</view>
+      <text class="empty-text">暂无PDF生成历史</text>
+      <text class="empty-desc">去生成你的第一个PDF吧</text>
+      <button class="go-back-btn" bindtap="goBack">返回生成页面</button>
+    </view>
+  </view>
+  
+  <view class="footer" wx:if="{{historyList.length > 0}}">
+    <button class="back-btn" bindtap="goBack">← 返回</button>
+    <button class="clear-all-btn" bindtap="clearAllHistory">
+      清空所有历史
+    </button>
+  </view>
+</view>

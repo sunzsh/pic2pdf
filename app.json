@@ -1,6 +1,7 @@
 {
   "pages": [
-    "pages/pdf-maker/pdf-maker"
+    "pages/pdf-maker/pdf-maker",
+    "pages/pdf-history/pdf-history"
   ],
   "window": {
     "backgroundTextStyle": "light",
