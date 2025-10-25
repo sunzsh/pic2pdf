@@ -396,7 +396,7 @@ Page({
       console.error('生成PDF失败:', error);
       wx.hideLoading();
       wx.showToast({
-        title: '生成PDF失败',
+        title: '生成PDF失败，可能是历史文件太多了！',
         icon: 'none'
       });
     } finally {

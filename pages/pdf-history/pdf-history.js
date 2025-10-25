@@ -36,35 +36,42 @@ Page({
       // 读取目录下的所有文件
       const files = await this.getDirFiles(pdfsDir);
       
-      // 过滤PDF文件并按创建时间排序
-      const pdfFiles = files
-        .filter(file => file.endsWith('.pdf'))
-        .map(fileName => {
-          const filePath = `${pdfsDir}/${fileName}`;
-          return {
+      // 过滤PDF文件并获取文件信息
+      const pdfFiles = [];
+      for (const fileName of files.filter(file => file.endsWith('.pdf'))) {
+        const filePath = `${pdfsDir}/${fileName}`;
+        try {
+          const stats = await this.getFileStats(filePath);
+          const fileSize = stats.stats ? stats.stats.size : stats.size;
+          const lastModifiedTime = stats.stats ? stats.stats.lastModifiedTime : stats.lastModifiedTime;
+          
+          pdfFiles.push({
+            fileName,
+            filePath,
+            createTime: this.formatTimestamp(lastModifiedTime),
+            fileSize: this.formatFileSize(fileSize)
+          });
+        } catch (error) {
+          console.error(`获取文件 ${fileName} 信息失败:`, error);
+          // 如果获取文件信息失败，使用文件名时间作为备选
+          pdfFiles.push({
             fileName,
             filePath,
             createTime: this.formatFileTime(fileName),
-            fileSize: '未知大小'
-          };
-        })
-        .sort((a, b) => {
-          // 按文件名（时间戳）降序排列，最新的在前
-          return b.fileName.localeCompare(a.fileName);
-        });
-
-      // 获取文件大小
-      for (let i = 0; i < pdfFiles.length; i++) {
-        try {
-          const stats = await this.getFileStats(pdfFiles[i].filePath);
-          // 文件大小在 stats.stats.size 中
-          const fileSize = stats.stats ? stats.stats.size : stats.size;
-          pdfFiles[i].fileSize = this.formatFileSize(fileSize);
-        } catch (error) {
-          console.error('获取文件大小失败:', error);
-          pdfFiles[i].fileSize = '获取失败';
+            fileSize: '获取失败'
+          });
         }
       }
+
+      // 按修改时间降序排列，最新的在前
+      pdfFiles.sort((a, b) => {
+        // 如果两个文件都有有效的时间戳，按时间排序
+        if (a.createTime !== '未知时间' && b.createTime !== '未知时间') {
+          return b.createTime.localeCompare(a.createTime);
+        }
+        // 否则按文件名排序
+        return b.fileName.localeCompare(a.fileName);
+      });
 
       this.setData({ historyList: pdfFiles });
     } catch (error) {
@@ -106,7 +113,27 @@ Page({
     });
   },
 
-  // 格式化文件时间
+  // 格式化时间戳
+  formatTimestamp(timestamp) {
+    try {
+      if (!timestamp) return '未知时间';
+      
+      const date = new Date(timestamp * 1000); // 时间戳是秒，需要转换为毫秒
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hour = String(date.getHours()).padStart(2, '0');
+      const minute = String(date.getMinutes()).padStart(2, '0');
+      const second = String(date.getSeconds()).padStart(2, '0');
+      
+      return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    } catch (error) {
+      console.error('格式化时间戳失败:', error);
+      return '未知时间';
+    }
+  },
+
+  // 格式化文件时间（从文件名解析，作为备选方案）
   formatFileTime(fileName) {
     try {
       // 从文件名中提取时间戳（格式：YYYYMMDDHHMMSS.pdf）
@@ -289,3 +316,4 @@ Page({
     });
   }
 });
+
