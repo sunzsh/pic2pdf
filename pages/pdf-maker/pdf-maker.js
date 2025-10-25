@@ -4,17 +4,14 @@ Page({
   data: {
     images: [],
     isGenerating: false,
-    user: {
-      name: '小山',
-      age: 36
-    },
     itemWidth: 220,
     itemHeight: 220,
     draggingIndex: -1,
     draggingTarget: -1,
     pageStyleGlobal: {},
     combineImages: false,
-    margin: 10  // Default margin value
+    margin: 10,
+    customFilename: ''  // 添加自定义文件名
   },
 
   onLoad() {
@@ -24,7 +21,6 @@ Page({
     const rect = wx.getMenuButtonBoundingClientRect()
     const windowInfo = wx.getWindowInfo();
     const pageStyleGlobal = `--status-bar-height: ${windowInfo.statusBarHeight}px;`
-    // console.log(pageStyleGlobal);
     this.setData({ pageStyleGlobal })
   },
 
@@ -41,7 +37,8 @@ Page({
         const currentImages = this.data.images;
         const newImages = sortedFiles.map((file, index) => {
           return {
-            path: file.path
+            path: file.path,
+            rotation: 0  // 添加旋转角度属性
           };
         });
         
@@ -183,6 +180,21 @@ Page({
     this.setData({ margin });
   },
 
+  // 旋转图片
+  rotateImage(e) {
+    const index = e.currentTarget.dataset.index;
+    const images = [...this.data.images];
+    images[index].rotation = (images[index].rotation + 90) % 360;
+    this.setData({ images });
+  },
+
+  // 处理文件名变化
+  onFilenameChange(e) {
+    this.setData({
+      customFilename: e.detail.value
+    });
+  },
+
   // 生成PDF
   async generatePDF() {
     if (this.data.images.length === 0) {
@@ -202,16 +214,17 @@ Page({
       // 创建PDF文档
       const doc = new jsPDF();
       let currentPage = 1;
-      let currentY = 10; // 当前页面的Y坐标
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = this.data.margin;
-      const maxContentWidth = pageWidth - 2 * margin;
-      const maxContentHeight = pageHeight - 2 * margin;
+      let currentY = margin; // 当前页面的Y坐标
+      let maxContentWidth = pageWidth - 2 * margin;
+      let maxContentHeight = pageHeight - 2 * margin;
 
       // 处理所有图片
       for (let i = 0; i < this.data.images.length; i++) {
         const imagePath = this.data.images[i].path;
+        const rotation = this.data.images[i].rotation;
 
         // 获取图片信息
         const imageInfo = await new Promise((resolve, reject) => {
@@ -228,13 +241,24 @@ Page({
         });
 
         // 计算图片在PDF中的尺寸
+        let width = imageInfo.width;
+        let height = imageInfo.height;
+
+        
+        // 如果图片需要旋转，交换宽高
+        if (rotation === 90 || rotation === 270) {
+          [width, height] = [height, width];
+          // [maxContentWidth, maxContentHeight] = [maxContentHeight, maxContentWidth];
+        }
+
         const scale = Math.min(
-          maxContentWidth / imageInfo.width,
-          maxContentHeight / imageInfo.height
+          maxContentWidth / width,
+          maxContentHeight / height
         );
         
-        const scaledWidth = imageInfo.width * scale;
-        const scaledHeight = imageInfo.height * scale;
+        const scaledWidth = width * scale;
+        const scaledHeight = height * scale;
+
 
         // 如果不合并图片，每张图片都从新页面开始
         if (!this.data.combineImages) {
@@ -245,7 +269,7 @@ Page({
           currentY = margin;
         } else {
           // 如果合并图片且当前页面放不下，添加新页面
-          if (currentY + scaledHeight > maxContentHeight) {
+          if (currentY + scaledHeight > maxContentHeight + 1) {
             doc.addPage();
             currentPage++;
             currentY = margin;
@@ -282,28 +306,16 @@ Page({
           let uint8Array = new Uint8Array(imageData);
           const isPNG = uint8Array[0] === 0x89 && uint8Array[1] === 0x50;
           const isJPEG = uint8Array[0] === 0xFF && uint8Array[1] === 0xD8;
-          
-          if (isPNG) {
-            const canvas = wx.createOffscreenCanvas({ type: '2d', width: imageInfo.width, height: imageInfo.height });
-            const ctx = canvas.getContext('2d');
-            
-            const img = canvas.createImage();
-            
-            await new Promise((resolve, reject) => {
-              img.onload = resolve;
-              img.onerror = reject;
-              img.src = `data:image/png;base64,${wx.arrayBufferToBase64(imageData)}`;
-            });
-            
-            ctx.drawImage(img, 0, 0, imageInfo.width, imageInfo.height);
-            
-            const jpegBase64 = canvas.toDataURL('image/jpeg', 0.95).split(',')[1];
-            const buffer = wx.base64ToArrayBuffer(jpegBase64);
-            uint8Array = new Uint8Array(buffer);
+          if (rotation === 90) {
+            doc.addImage(uint8Array, isJPEG ? 'JPEG' : (isPNG ? 'PNG' : ''), adjustedX + adjustedWidth, adjustedY + (adjustedHeight - adjustedWidth), adjustedHeight, adjustedWidth, '', 'NONE', 90);
+          } else if (rotation === 180) {
+            doc.addImage(uint8Array, isJPEG ? 'JPEG' : (isPNG ? 'PNG' : ''), adjustedX + adjustedWidth, adjustedY - adjustedHeight, adjustedWidth, adjustedHeight, '', 'NONE', 180);
+          } else if (rotation === 270) { 
+            doc.addImage(uint8Array, isJPEG ? 'JPEG' : (isPNG ? 'PNG' : ''), adjustedX, adjustedY - adjustedWidth, adjustedHeight, adjustedWidth, '', 'NONE', 270);
+          }else {
+            doc.addImage(uint8Array, isJPEG ? 'JPEG' : (isPNG ? 'PNG' : ''), adjustedX, adjustedY, adjustedWidth, adjustedHeight, '', 'NONE', 0);
           }
           
-          // 添加到PDF
-          doc.addImage(uint8Array, 'JPEG', adjustedX, adjustedY, adjustedWidth, adjustedHeight, '', 'NONE');
           
           // 更新当前Y坐标（仅在合并图片时）
           if (this.data.combineImages) {
@@ -320,17 +332,21 @@ Page({
       const pdfData = doc.output('arraybuffer');
       
       const base64 = wx.arrayBufferToBase64(pdfData);
-      // yyyyMMddHHmmss
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-
-      const fileName = `${year}${month}${day}${hours}${minutes}${seconds}.pdf`;
-      const filePath = `${wx.env.USER_DATA_PATH}/${fileName}`;
+      // 生成文件名
+      let fileName;
+      if (this.data.customFilename) {
+        fileName = `${this.data.customFilename}.pdf`;
+      } else {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        fileName = `${year}${month}${day}${hours}${minutes}${seconds}.pdf`;
+      }
+      const filePath = `${wx.env.USER_DATA_PATH}/pdfs/${fileName}`;
       
       
       await new Promise((resolve, reject) => {

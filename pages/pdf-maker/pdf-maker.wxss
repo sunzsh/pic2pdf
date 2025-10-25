@@ -74,6 +74,21 @@ root {
   font-size: 32rpx;
 }
 
+.rotate-btn {
+  position: absolute;
+  bottom: 10rpx;
+  right: 10rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+}
+
 .add-btn {
   width: 220rpx;
   height: 220rpx;
@@ -121,6 +136,14 @@ root {
 
 .margin-input {
   width: 120rpx;
+  text-align: right;
+  border: 1rpx solid #ddd;
+  border-radius: 6rpx;
+  padding: 4rpx 10rpx;
+}
+
+.filename-input {
+  width: 300rpx;
   text-align: right;
   border: 1rpx solid #ddd;
   border-radius: 6rpx;

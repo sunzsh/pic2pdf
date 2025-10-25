@@ -11,8 +11,9 @@
                       bindtouchmove="onTouchMove" 
                       bindtouchend="onTouchEnd" 
                       data-index="{{index}}">
-          <image src="{{item.path}}" mode="aspectFill" bindtap="previewImage" data-url="{{item.path}}"></image>
+          <image src="{{item.path}}" mode="aspectFill" bindtap="previewImage" data-url="{{item.path}}" style="transform: rotate({{item.rotation}}deg);"></image>
           <view class="delete-btn" catchtap="deleteImage" data-index="{{index}}">×</view>
+          <view class="rotate-btn" catchtap="rotateImage" data-index="{{index}}">↻</view>
         </view>
       </block>
       <view class="add-btn" bindtap="chooseImage" wx:if="{{images.length < 32}}">
@@ -24,12 +25,16 @@
   <view class="footer">
     <view class="options">
       <view class="option-item">
-        <text>合并图片到同一页</text>
+        <text>尽量合并图片到同一页</text>
         <switch checked="{{combineImages}}" bindchange="onCombineImagesChange" />
       </view>
       <view class="option-item">
         <text>页面边距 (mm)</text>
         <input type="number" value="{{margin}}" bindchange="onMarginChange" class="margin-input" />
+      </view>
+      <view class="option-item">
+        <text>自定义文件名</text>
+        <input type="text" value="{{customFilename}}" bindchange="onFilenameChange" class="filename-input" placeholder="不填则使用时间戳" />
       </view>
     </view>
     <button class="generate-btn" bindtap="generatePDF" disabled="{{images.length === 0}}">
